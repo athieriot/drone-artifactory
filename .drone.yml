@@ -1,0 +1,22 @@
+build:
+  image: node:4.2
+  commands:
+    - npm install
+
+publish:
+  docker:
+    username: athieriot
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: drone-plugin/drone-artifactory
+    when:
+      branch: master
+
+plugin:
+  name: Artifactory
+  desc: Publish Artifacts to Artifactory
+  type: publish
+  image: drone-plugin/drone-artifactory
+  labels:
+    - publish
+    - artifactory

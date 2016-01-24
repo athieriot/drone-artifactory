@@ -1,0 +1,9 @@
+[people]
+  [people.athieriot]
+    name = "Aurélien Thieriot"
+    email = "a.thieriot@gmail.com"
+    login = "athieriot"
+
+[orgs]
+  [org.core]
+    people = ["athieriot"]

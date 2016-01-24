@@ -1,0 +1,27 @@
+{
+  "name": "drone-artifactory",
+  "version": "1.0.0",
+  "description": "Drone plugin for sending artifacts to artifactory",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/drone-plugin/drone-artifactory.git"
+  },
+  "keywords": [
+    "droneio",
+    "artifactory"
+  ],
+  "author": "Aurélien Thieriot",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/drone-plugin/drone-artifactory/issues"
+  },
+  "homepage": "https://github.com/drone-plugin/drone-artifactory#README.md",
+  "dependencies": {
+    "artifactory-api": "0.0.3",
+    "btoa": "^1.1.2",
+    "drone-node": "^1.0.1",
+    "pom-parser": "^1.1.0",
+    "shelljs": "^0.5.3"
+  }
+}
