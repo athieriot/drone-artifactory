@@ -3,7 +3,7 @@
 FROM alpine:3.3
 
 RUN apk update && \
-    apk add 'nodejs>4.2.4' && \
+    apk add nodejs && \
     rm -rf /var/cache/apk/*
 
 WORKDIR /bin
