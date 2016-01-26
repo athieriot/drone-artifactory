@@ -10,6 +10,6 @@ WORKDIR /node
 
 COPY package.json /node/
 RUN npm install
-COPY . /node/
+COPY index.js /node/
 
 ENTRYPOINT [ "node", "index.js" ]
