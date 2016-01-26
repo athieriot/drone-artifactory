@@ -8,7 +8,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: drone-plugin/drone-artifactory
+    repo: plugins/drone-artifactory
     tag: latest
     when:
       branch: master
@@ -17,7 +17,7 @@ plugin:
   name: Artifactory
   desc: Publish Artifacts to Artifactory
   type: publish
-  image: drone-plugin/drone-artifactory
+  image: plugins/drone-artifactory
   labels:
     - publish
     - artifactory
