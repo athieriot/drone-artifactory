@@ -6,10 +6,10 @@ RUN apk update && \
     apk add nodejs && \
     rm -rf /var/cache/apk/*
 
-WORKDIR /bin
+WORKDIR /node
 
-COPY package.json /bin/
+COPY package.json /node/
 RUN npm install
-COPY . /bin/
+COPY . /node/
 
 ENTRYPOINT [ "node", "index.js" ]
