@@ -5,10 +5,11 @@ build:
 
 publish:
   docker:
-    username: athieriot
+    username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
     repo: drone-plugin/drone-artifactory
+    tag: latest
     when:
       branch: master
 
