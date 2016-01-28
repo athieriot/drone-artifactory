@@ -1,15 +1,15 @@
-# Docker image for the Drone Artifactory plugin
-
 FROM alpine:3.3
 
 RUN apk update && \
-    apk add nodejs && \
-    rm -rf /var/cache/apk/*
+  apk add \
+    ca-certificates \
+    nodejs && \
+  rm -rf \
+    /var/cache/apk/*
 
 WORKDIR /node
-
-COPY package.json /node/
+ADD package.json /node/
+ADD index.js /node/
 RUN npm install
-COPY index.js /node/
 
-ENTRYPOINT [ "node", "index.js" ]
+ENTRYPOINT ["node", "index.js"]
