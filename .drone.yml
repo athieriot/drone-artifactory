@@ -1,9 +1,13 @@
 build:
   image: node:4.2
   commands:
-    - npm install
+    - make install
+    - make test
 
 publish:
+  coverage:
+    when:
+      branch: master
   docker:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
@@ -12,12 +16,19 @@ publish:
     tag: latest
     when:
       branch: master
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: plugins/drone-artifactory
+    tag: develop
+    when:
+      branch: develop
 
 plugin:
   name: Artifactory
-  desc: Publish Artifacts to Artifactory
+  desc: Publish files and artifacts to Artifactory
   type: publish
   image: plugins/drone-artifactory
   labels:
-    - publish
     - artifactory
