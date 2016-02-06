@@ -1,12 +1,12 @@
 .PHONY: install test docker
 
-IMAGE ?= plugins/drone-nuget
+IMAGE ?= plugins/drone-artifactory
 
 install:
-	npm install
+	npm install --quiet
 
 test:
-	@echo "Currently we don't provide test cases!"
+	npm test
 
 docker:
 	docker build --rm -t $(IMAGE) .

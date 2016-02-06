@@ -10,6 +10,6 @@ RUN apk update && \
 WORKDIR /node
 ADD package.json /node/
 ADD index.js /node/
-RUN npm install
+RUN npm install --production
 
 ENTRYPOINT ["node", "index.js"]

@@ -100,13 +100,15 @@ var check_params = function (params) {
 }
 
 // Expose public methods for tests
-module.exports = {
-  check_params: check_params,
-  expands_files: expands_files,
-  do_upload: do_upload
+if(require.main === module) {
+  plugin.parse()
+  .then(check_params)
+  .then(do_upload)
+  .catch((msg) => { winston.error(msg); process.exit(1); });
+} else {
+  module.exports = {
+    check_params: check_params,
+    expands_files: expands_files,
+    do_upload: do_upload
+  }
 }
-
-plugin.parse()
-.then(check_params)
-.then(do_upload)
-.catch((msg) => { winston.error(msg); process.exit(1); });

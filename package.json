@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Drone plugin to publish files and artifacts to Artifactory",
   "main": "index.js",
+  "scripts": {
+    "test": "node node_modules/gulp/bin/gulp.js default"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/drone-plugins/drone-artifactory.git"
