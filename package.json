@@ -23,5 +23,13 @@
     "drone-node": "^1.0.1",
     "pom-parser": "^1.1.0",
     "shelljs": "^0.5.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-istanbul": "^0.10.3",
+    "gulp-exit": "0.0.2",
+    "gulp-mocha": "^2.2.0",
+    "nock": "^7.0.2",
+    "unexpected": "^10.8.1"
   }
 }

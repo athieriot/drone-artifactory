@@ -34,4 +34,4 @@ publish:
 
 ## pom.xml deployment
 
-In the example above, pom.xml will be deployed as '<groupId>-<artifactId>-<version>.pom'
+In the example above, pom.xml will be deployed as ```<groupId>-<artifactId>-<version>.pom```

@@ -9,82 +9,101 @@ const btoa = require('btoa');
 const fs = require('fs');
 const path = require('path');
 
-const do_upload = function (workspace, vargs) {
-  if (vargs.url && vargs.repo_key) {
+var expands_files = function (path, files) { return [].concat.apply([], files.map((f) => { return shelljs.ls(path + '/' + f); })); }
 
-    var hash = btoa(vargs.username + ':' + vargs.password)
-    var artifactory = new ArtifactoryAPI(vargs.url, hash);
+var publish_file = function (artifactory, repo_key, project, file, force_upload) {
+  return new Promise((resolve, reject) => {
+    var basename = path.basename(file);
+    // If file to publish is a pom file, change name to official Maven requirements
+    if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; } 
 
-    var resolved_files = [].concat.apply([], vargs.files.map((f) => { return shelljs.ls(workspace.path + '/' + f); }));
+    console.log('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
+    return artifactory.uploadFile(repo_key, '/' + project.group_id + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
+    .then((uploadInfo) => {
 
-    console.log('Project groupId: ' + vargs.group_id);
-    console.log('Project artifactId: ' + vargs.artifact_id);
-    console.log('Project version: ' + vargs.version);
+      console.log('Upload successful. Available at: ' + uploadInfo.downloadUri)
+      resolve();
+    }).catch((err) => {
 
-    resolved_files.forEach((file) => {
-      var basename = path.basename(file);
-
-      // Default repo_key to 'libs-snapshot-local' or 'libs-release-local'
-      if (!vargs.repo_key) { vargs.version.toLowerCase().indexOf('snapshot') > -1 ? vargs.repo_key = 'libs-snapshot-local' : vargs.repo_key = 'libs-release-local'; }
-      if (file.indexOf('pom') > -1) { basename = vargs.artifact_id + '-' + vargs.version + '.pom'; } 
-
-      console.log('Uploading ' + file + ' as ' + basename + ' into ' + vargs.repo_key);
-      artifactory.uploadFile(vargs.repo_key, '/' + vargs.group_id + '/' + vargs.artifact_id + '/' + vargs.version + '/' + basename, file, vargs.force_upload)
-      .then(function (uploadInfo) {
-
-        console.log('Upload successful. Available at: ' + uploadInfo.downloadUri)
-      }).fail(function (err) {
-
-        console.log('An error happened while trying to push the file ' + file + ': ' + err);
-      });
+      reject('An error happened while trying to publish the file ' + file + ': ' + err);
     });
-  } else {
-
-    console.log("Parameter missing: Artifactory URL or Repository Key");
-    process.exit(1)
-  }
+  });
 }
 
-plugin.parse().then((params) => {
-
-  // gets build and repository information for
-  // the current running build
-  const build = params.build;
-  const repo  = params.repo;
+var do_upload = function (params) {
+  // gets build and repository information for the current running build
   const workspace = params.workspace;
 
-  // gets plugin-specific parameters defined in
-  // the .drone.yml file
+  // gets plugin-specific parameters defined in the .drone.yml file
   const vargs = params.vargs;
+  const project = {
+    group_id: vargs.group_id,
+    artifact_id: vargs.artifact_id,
+    version: vargs.version
+  }
 
-  vargs.username      || (vargs.username = '');
-  vargs.password      || (vargs.password = '');
-  vargs.files         || (vargs.files = []);
-  vargs.force_upload  || (vargs.force_upload = false);
+  console.log('Project groupId: ' + project.group_id);
+  console.log('Project artifactId: ' + project.artifact_id);
+  console.log('Project version: ' + project.version);
 
-  if (vargs.pom) {
-    if (!fs.existsSync(workspace.path + '/' + vargs.pom)) {
-      console.log('Given pom file has to exists');
-      process.exit(2);
+  var hash = btoa(vargs.username + ':' + vargs.password)
+  var artifactory = new ArtifactoryAPI(vargs.url, hash);
+
+  // Default repo_key to 'libs-snapshot-local' or 'libs-release-local'
+  if (!vargs.repo_key) { project.version.toLowerCase().indexOf('snapshot') > -1 ? vargs.repo_key = 'libs-snapshot-local' : vargs.repo_key = 'libs-release-local'; }
+
+  return Promise.all(
+    expands_files(workspace.path, vargs.files)
+    .map((file) => { return publish_file(artifactory, vargs.repo_key, project, file, vargs.force_upload); })
+  );
+}
+
+var check_params = function (params) {
+  return new Promise((resolve, reject) => {
+    params.vargs.username      || (params.vargs.username = '');
+    params.vargs.password      || (params.vargs.password = '');
+    params.vargs.files         || (params.vargs.files = []);
+    params.vargs.force_upload  || (params.vargs.force_upload = false);
+
+    if (!params.vargs.url) {
+      return reject("Artifactory URL is missing and Mandatory");
     }
 
-    pomParser.parse({ filePath: workspace.path + '/' + vargs.pom }, function(err, pomResponse) {
-      if (err) {
-        console.log('An error happened while trying to parse the pom file: ' + err);
-        process.exit(3);
+    if (params.vargs.pom) {
+      if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
+        return reject('Given pom file has to exists');
       }
 
-      vargs.group_id    || (vargs.group_id = pomResponse.pomObject.project.groupid);
-      vargs.artifact_id || (vargs.artifact_id = pomResponse.pomObject.project.artifactid);
-      vargs.version     || (vargs.version = pomResponse.pomObject.project.version);
-      if (!vargs.group_id || !vargs.artifact_id || !vargs.version) {
-        console.log('Artifact details must be specified manually or via a Pom file');
-        process.exit(4);
+      pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
+        if (err) { return reject('An error happened while trying to parse the pom file: ' + err); }
+
+        params.vargs.group_id    || (params.vargs.group_id = pomResponse.pomObject.project.groupid);
+        params.vargs.artifact_id || (params.vargs.artifact_id = pomResponse.pomObject.project.artifactid);
+        params.vargs.version     || (params.vargs.version = pomResponse.pomObject.project.version);
+        if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+          return reject('Some artifact details are missing from Pom file');
+        }
+
+        return resolve(params);
+      });
+    } else {
+      if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+        return reject('Artifact details must be specified manually if no Pom file is given');
       }
 
-      do_upload(workspace, vargs);
-    });
-  } else {
-      do_upload(workspace, vargs);
-  }
-});
+      return resolve(params);
+    }
+  });
+}
+
+// Expose public methods for tests
+module.exports = {
+  check_params: check_params,
+  expands_files: expands_files,
+  do_upload: do_upload
+}
+
+plugin.parse()
+.then(check_params)
+.then(do_upload)
+.catch((msg) => { console.error(msg); process.exit(1); });
