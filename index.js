@@ -4,6 +4,7 @@ const plugin = new Drone.Plugin();
 const ArtifactoryAPI = require('artifactory-api');
 const pomParser = require("pom-parser");
 const shelljs = require("shelljs");
+const winston = require("winston");
 
 const btoa = require('btoa');
 const fs = require('fs');
@@ -17,11 +18,11 @@ var publish_file = function (artifactory, repo_key, project, file, force_upload)
     // If file to publish is a pom file, change name to official Maven requirements
     if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; } 
 
-    console.log('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
+    winston.info('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
     return artifactory.uploadFile(repo_key, '/' + project.group_id + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
     .then((uploadInfo) => {
 
-      console.log('Upload successful. Available at: ' + uploadInfo.downloadUri)
+      winston.info('Upload successful. Available at: ' + uploadInfo.downloadUri)
       resolve();
     }).catch((err) => {
 
@@ -42,9 +43,11 @@ var do_upload = function (params) {
     version: vargs.version
   }
 
-  console.log('Project groupId: ' + project.group_id);
-  console.log('Project artifactId: ' + project.artifact_id);
-  console.log('Project version: ' + project.version);
+  if (vargs.log_level) { winston.level = vargs.log_level; }
+
+  winston.info('Project groupId: ' + project.group_id);
+  winston.info('Project artifactId: ' + project.artifact_id);
+  winston.info('Project version: ' + project.version);
 
   var hash = btoa(vargs.username + ':' + vargs.password)
   var artifactory = new ArtifactoryAPI(vargs.url, hash);
@@ -106,4 +109,4 @@ module.exports = {
 plugin.parse()
 .then(check_params)
 .then(do_upload)
-.catch((msg) => { console.error(msg); process.exit(1); });
+.catch((msg) => { winston.error(msg); process.exit(1); });

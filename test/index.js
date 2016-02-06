@@ -82,7 +82,8 @@ describe('Drone Artifactory', function () {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0',
-          files: ['pom.xml']
+          files: ['pom.xml'],
+          log_level: 'warn'
         }
       }; 
 
@@ -102,7 +103,8 @@ describe('Drone Artifactory', function () {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
-          files: ['test.jar']
+          files: ['test.jar'],
+          log_level: 'warn'
         }
       }; 
 
@@ -123,7 +125,8 @@ describe('Drone Artifactory', function () {
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
           files: ['test.jar'],
-          repo_key: 'custom_repo'
+          repo_key: 'custom_repo',
+          log_level: 'warn'
         }
       }; 
 
@@ -143,7 +146,8 @@ describe('Drone Artifactory', function () {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
-          files: ['test.jar']
+          files: ['test.jar'],
+          log_level: 'warn'
         }
       }; 
 
@@ -160,7 +164,8 @@ describe('Drone Artifactory', function () {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
-          files: ['test.jar']
+          files: ['test.jar'],
+          log_level: 'warn'
         }
       }; 
 
@@ -181,7 +186,8 @@ describe('Drone Artifactory', function () {
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
           files: ['test.jar'],
-          force_upload: true
+          force_upload: true,
+          log_level: 'warn'
         }
       }; 
 
@@ -207,7 +213,8 @@ describe('Drone Artifactory', function () {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
           group_id: 'drone', artifact_id: 'arti', version: '2.0-SNAPSHOT',
-          files: ['pom.xml', 'test.jar']
+          files: ['pom.xml', 'test.jar'],
+          log_level: 'warn'
         }
       }; 
 
