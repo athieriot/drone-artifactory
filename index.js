@@ -87,6 +87,10 @@ var check_params = function (params) {
           return reject('Some artifact details are missing from Pom file');
         }
 
+        if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
+          params.vargs.files.push(params.vargs.pom);
+        }
+
         return resolve(params);
       });
     } else {
