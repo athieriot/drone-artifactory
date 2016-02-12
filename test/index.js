@@ -50,6 +50,16 @@ describe('Drone Artifactory', function () {
 
       return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'drone', artifact_id: 'artifactory', version: '0'} });
     });
+    it('should add pom to files automatically if provided',function() {
+      var params={vargs: { url: 'http',pom: 'pom.xml'}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+    it('should not add duplicate pom to files if pom already specified as file',function(){
+      var params={vargs: { url: 'http',pom: 'pom.xml',files: ['pom.xml']}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
   });
 
   describe('#expands_files()', function () {

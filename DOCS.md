@@ -27,11 +27,13 @@ publish:
     pom: pom.xml 
     repo_key: libs-snapshot-local
     files: 
-      - pom.xml
       - target/*.jar
       - target/*.war
 ```
 
 ## pom.xml deployment
 
+If a pom parameter is specified it will be automatically deployed. It is not necessary to specify the pom under the files parameter. 
+
 In the example above, pom.xml will be deployed as ```<groupId>-<artifactId>-<version>.pom```
+
