@@ -48,7 +48,32 @@ describe('Drone Artifactory', function () {
     it('should read details from a correct pom file', function () {
       var params = {vargs: { url: 'http', pom: 'pom.xml'}, workspace: { path: './test/files' }};
 
-      return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'drone', artifact_id: 'artifactory', version: '0'} });
+      return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
+    });
+    it('should read details from correct group id, artifact id and version', function () {
+      var params = {vargs: { url: 'http', group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'}, workspace: { path: './test/files' }};
+
+      return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
+    });
+    it('should add pom to files automatically if provided',function() {
+      var params={vargs: { url: 'http',pom: 'pom.xml'}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+    it('should not add duplicate pom to files if pom already specified as file',function(){
+      var params={vargs: { url: 'http',pom: 'pom.xml',files: ['pom.xml']}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+    it('should add pom to files automatically if provided',function() {
+      var params={vargs: { url: 'http',pom: 'pom.xml'}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+    it('should not add duplicate pom to files if pom already specified as file',function(){
+      var params={vargs: { url: 'http',pom: 'pom.xml',files: ['pom.xml']}, workspace: {path: './test/files'}};
+
+      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
     });
   });
 
@@ -70,10 +95,10 @@ describe('Drone Artifactory', function () {
   describe('#do_upload()', function () {
     it('should publish a pom file with required name', function () {
       var req = nock('http://arti.facto.ry')
-                .intercept('/artifactory/libs-release-local/drone/arti/2.0/arti-2.0.pom', 'HEAD')
+                .intercept('/artifactory/libs-release-local/com/example/drone/arti/2.0/arti-2.0.pom', 'HEAD')
                 .basicAuth({ user: 'admin', pass: 'admin' })
                 .reply(404)
-                .put('/artifactory/libs-release-local/drone/arti/2.0/arti-2.0.pom')
+                .put('/artifactory/libs-release-local/com/example/drone/arti/2.0/arti-2.0.pom')
                 .basicAuth({ user: 'admin', pass: 'admin' })
                 .reply(201, {});
 
@@ -81,7 +106,7 @@ describe('Drone Artifactory', function () {
         vargs: {
           url: 'http://arti.facto.ry',
           username: 'admin', password: 'admin',
-          group_id: 'drone', artifact_id: 'arti', version: '2.0',
+          group_id: 'com.example.drone', artifact_id: 'arti', version: '2.0',
           files: ['pom.xml'],
           log_level: 'warn'
         }
@@ -219,6 +244,12 @@ describe('Drone Artifactory', function () {
       }; 
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
+    });
+  });
+
+  describe('#replace_dots()', function () {
+    it('should be able to replace dots', function () {
+      expect(arti.replace_dots('com.example.xyz'), 'to contain', 'com/example/xyz');
     });
   });
 });

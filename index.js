@@ -19,7 +19,7 @@ var publish_file = function (artifactory, repo_key, project, file, force_upload)
     if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; } 
 
     winston.info('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
-    return artifactory.uploadFile(repo_key, '/' + project.group_id + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
+    return artifactory.uploadFile(repo_key, '/' + replace_dots(project.group_id) + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
     .then((uploadInfo) => {
 
       winston.info('Upload successful. Available at: ' + uploadInfo.downloadUri)
@@ -87,6 +87,10 @@ var check_params = function (params) {
           return reject('Some artifact details are missing from Pom file');
         }
 
+        if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
+          params.vargs.files.push(params.vargs.pom);
+        }
+
         return resolve(params);
       });
     } else {
@@ -99,6 +103,10 @@ var check_params = function (params) {
   });
 }
 
+var replace_dots = function(param){
+  return param.replace(new RegExp('\\.', 'g'),'/');
+}
+
 // Expose public methods for tests
 if(require.main === module) {
   plugin.parse()
@@ -109,6 +117,7 @@ if(require.main === module) {
   module.exports = {
     check_params: check_params,
     expands_files: expands_files,
-    do_upload: do_upload
+    do_upload: do_upload,
+    replace_dots: replace_dots
   }
 }
