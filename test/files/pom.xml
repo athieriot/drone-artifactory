@@ -5,7 +5,7 @@
 
   <modelVersion>4.0.0</modelVersion>
  
-  <groupId>drone</groupId>
+  <groupId>com.example.drone</groupId>
   <artifactId>artifactory</artifactId>
   <version>0</version>
 </project>
