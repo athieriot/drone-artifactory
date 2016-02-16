@@ -6,7 +6,7 @@ build:
 
 publish:
   coverage:
-    include: coverage/lcov.info
+    include: drone-artifactory/coverage/lcov.info
     when:
       branch: master
   docker:
