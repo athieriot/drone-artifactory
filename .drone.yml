@@ -6,6 +6,7 @@ build:
 
 publish:
   coverage:
+    # Must match parts of the absolute path
     include: drone-artifactory/coverage/lcov.info
     when:
       branch: master
