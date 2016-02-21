@@ -1,6 +1,8 @@
-.PHONY: install test docker
+.PHONY: all install test docker
 
 IMAGE ?= plugins/drone-artifactory
+
+all: install test
 
 install:
 	npm install --quiet
