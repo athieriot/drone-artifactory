@@ -4,7 +4,7 @@
 [![Coverage Status](https://aircover.co/badges/drone-plugins/drone-artifactory/coverage.svg)](https://aircover.co/drone-plugins/drone-artifactory)
 [![](https://badge.imagelayers.io/plugins/drone-artifactory:latest.svg)](https://imagelayers.io/?images=plugins/drone-artifactory:latest 'Get your own badge on imagelayers.io')
 
-Drone plugin to publish files and artifacts to Artifactory
+Drone plugin to publish files and artifacts to Artifactory. For the usage information and a listing of the available options please take a look at [the docs](DOCS.md).
 
 ## Execute
 
