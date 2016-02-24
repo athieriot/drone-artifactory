@@ -4,6 +4,8 @@
     email = "brad@drone.io"
     login = "bradrydzewski"
   [people.Bugagazavr]
+    name = "Kirill"
+    email = ""
     login = "Bugagazavr"
   [people.donny-dont]
     name = "Don Olmstead"
@@ -32,4 +34,13 @@
 
 [org]
   [org.core]
-    people = ["bradrydzewski", "Bugagazavr", "donny-dont", "jackspirou", "msteinert", "nlf", "tboerger", "athieriot"]
+    people = [
+      "bradrydzewski",
+      "Bugagazavr",
+      "donny-dont",
+      "jackspirou",
+      "msteinert",
+      "nlf",
+      "tboerger",
+      "athieriot"
+    ]
