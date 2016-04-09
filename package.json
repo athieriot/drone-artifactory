@@ -24,8 +24,8 @@
     "artifactory-api": "0.0.3",
     "btoa": "^1.1.2",
     "drone-node": "^1.0.1",
+    "glob": "^7.0.3",
     "pom-parser": "^1.1.0",
-    "shelljs": "^0.5.3",
     "winston": "^2.1.1"
   },
   "devDependencies": {

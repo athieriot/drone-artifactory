@@ -70,15 +70,18 @@ describe('Drone Artifactory', function () {
   describe('#expands_files()', function () {
     it('should be able to resolve wildcards', function () {
 
-      expect(arti.expands_files('./test/files', ['*.json']), 'to contain', 'test/files/pom.json');
+      expect(arti.expands_files('./test/files', ['*.json']), 'to contain', './test/files/pom.json');
     });
     it('should be able to resolve a mix of wildcards and files', function () {
 
-      expect(arti.expands_files('./test/files', ['*.xml', 'test.jar']), 'to contain', 'test/files/pom.xml', 'test/files/useless.xml', './test/files/test.jar');
+      expect(arti.expands_files('./test/files', ['*.xml', 'test.jar']), 'to contain', './test/files/pom.xml', './test/files/useless.xml', './test/files/test.jar');
     });
     it('should be able to accept an empty array of files', function () {
 
       expect(arti.expands_files('./test/files', []), 'to be empty');
+    });
+    it('should be able to accept glob paths', function() {
+      expect(arti.expands_files('./test', ['**/*.jar']), 'to contain', './test/files/test.jar');
     });
   });
 
@@ -100,7 +103,7 @@ describe('Drone Artifactory', function () {
           files: ['pom.xml'],
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
     });
@@ -121,7 +124,7 @@ describe('Drone Artifactory', function () {
           files: ['test.jar'],
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
     });
@@ -143,7 +146,7 @@ describe('Drone Artifactory', function () {
           repo_key: 'custom_repo',
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
     });
@@ -164,7 +167,7 @@ describe('Drone Artifactory', function () {
           files: ['test.jar'],
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'to be rejected');
     });
@@ -182,7 +185,7 @@ describe('Drone Artifactory', function () {
           files: ['test.jar'],
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'to be rejected');
     });
@@ -204,7 +207,7 @@ describe('Drone Artifactory', function () {
           force_upload: true,
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
     });
@@ -231,7 +234,7 @@ describe('Drone Artifactory', function () {
           files: ['pom.xml', 'test.jar'],
           log_level: 'warn'
         }
-      }; 
+      };
 
       return expect(arti.do_upload(params).then(() => { return req.isDone(); }), 'when fulfilled', 'to equal', true);
     });

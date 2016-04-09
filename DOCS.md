@@ -14,6 +14,8 @@ You can override the default configuration with the following parameters:
 
 All file paths must be relative to current project sources
 
+File paths are interpreted with [node-glob](https://github.com/isaacs/node-glob#glob-primer) and can contain things such as regex, or directory wildcards(./\*\*/\*.js)
+
 ## Example
 
 The following is a sample configuration in your .drone.yml file:
@@ -29,6 +31,7 @@ publish:
     files: 
       - target/*.jar
       - target/*.war
+      - dist/**/*.min.js
 ```
 
 ## pom.xml deployment

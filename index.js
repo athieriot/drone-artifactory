@@ -3,20 +3,20 @@ const plugin = new Drone.Plugin();
 
 const ArtifactoryAPI = require('artifactory-api');
 const pomParser = require("pom-parser");
-const shelljs = require("shelljs");
+const glob = require("glob");
 const winston = require("winston");
 
 const btoa = require('btoa');
 const fs = require('fs');
 const path = require('path');
 
-var expands_files = function (path, files) { return [].concat.apply([], files.map((f) => { return shelljs.ls(path + '/' + f); })); }
+var expands_files = function (path, files) { return [].concat.apply([], files.map((f) => { return glob.sync(path + '/' + f); })); }
 
 var publish_file = function (artifactory, repo_key, project, file, force_upload) {
   return new Promise((resolve, reject) => {
     var basename = path.basename(file);
     // If file to publish is a pom file, change name to official Maven requirements
-    if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; } 
+    if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; }
 
     winston.info('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
     return artifactory.uploadFile(repo_key, '/' + replace_dots(project.group_id) + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
