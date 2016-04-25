@@ -1,0 +1,7 @@
+{
+  "version": "0",
+  "config": {
+    "group_id": "com.example.drone",
+    "artifact_id": "artifactory"
+  }
+}
