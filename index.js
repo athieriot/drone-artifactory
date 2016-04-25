@@ -61,6 +61,57 @@ var do_upload = function (params) {
   );
 }
 
+var parse_pom_file = function (params, resolve, reject) {
+  if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
+    return reject('Given pom file has to exists');
+  }
+
+  pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
+    if (err) { return reject('An error happened while trying to parse the pom file: ' + err); }
+
+    params.vargs.group_id    || (params.vargs.group_id = pomResponse.pomObject.project.groupid);
+    params.vargs.artifact_id || (params.vargs.artifact_id = pomResponse.pomObject.project.artifactid);
+    params.vargs.version     || (params.vargs.version = pomResponse.pomObject.project.version);
+
+    if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+      return reject('Some artifact details are missing from Pom file');
+    }
+
+    if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
+      params.vargs.files.push(params.vargs.pom);
+    }
+
+    return resolve(params);
+  });
+}
+
+var parse_package_file = function (params, resolve, reject) {
+  if (!fs.existsSync(params.workspace.path + '/' + params.vargs.package)) {
+    return reject('Given package file has to exist');
+  }
+
+  try {
+    var package = require(params.workspace.path + '/' + params.vargs.package)
+    var config = package.config || {};
+
+    params.vargs.group_id    || (params.vargs.group_id = config.group_id);
+    params.vargs.artifact_id || (params.vargs.artifact_id = config.artifact_id);
+    params.vargs.version     || (params.vargs.version = package.version);
+  } catch (err) {
+    return reject('An error happened while trying to parse the package file: ' + err);
+  }
+
+  if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+    return reject('Some artifact details are missing from package file');
+  }
+
+  if(params.vargs.files.indexOf(params.vargs.package)==-1) {
+    params.vargs.files.push(params.vargs.package);
+  }
+
+  return resolve(params);
+}
+
 var check_params = function (params) {
   return new Promise((resolve, reject) => {
     params.vargs.username      || (params.vargs.username = '');
@@ -73,26 +124,9 @@ var check_params = function (params) {
     }
 
     if (params.vargs.pom) {
-      if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
-        return reject('Given pom file has to exists');
-      }
-
-      pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
-        if (err) { return reject('An error happened while trying to parse the pom file: ' + err); }
-
-        params.vargs.group_id    || (params.vargs.group_id = pomResponse.pomObject.project.groupid);
-        params.vargs.artifact_id || (params.vargs.artifact_id = pomResponse.pomObject.project.artifactid);
-        params.vargs.version     || (params.vargs.version = pomResponse.pomObject.project.version);
-        if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
-          return reject('Some artifact details are missing from Pom file');
-        }
-
-        if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
-          params.vargs.files.push(params.vargs.pom);
-        }
-
-        return resolve(params);
-      });
+      return parse_pom_file(params, resolve, reject);
+    } else if (params.vargs.package) {
+      return parse_package_file(params, resolve, reject);
     } else {
       if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
         return reject('Artifact details must be specified manually if no Pom file is given');
@@ -116,6 +150,8 @@ if(require.main === module) {
 } else {
   module.exports = {
     check_params: check_params,
+    parse_pom_file: parse_pom_file,
+    parse_package_file: parse_package_file,
     expands_files: expands_files,
     do_upload: do_upload,
     replace_dots: replace_dots
