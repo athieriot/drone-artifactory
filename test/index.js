@@ -15,55 +15,96 @@ describe('Drone Artifactory', function () {
 
       return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { username: '', password: '', files: [], force_upload: false } });
     });
-    it('should stop if group id nor pom file is not provided', function () {
+    it('should stop if group id nor pom or package files are not provided', function () {
       var params = { vargs: { url: 'http' }};
 
       return expect(arti.check_params(params), 'when rejected', 'to contain', 'Artifact details must be specified manually if no Pom file is given');
     });
-    it('should stop if artifact id nor pom file is not provided', function () {
+    it('should stop if artifact id nor pom or package files are not provided', function () {
       var params = { vargs: { url: 'http', group_id: 'drone' }};
 
       return expect(arti.check_params(params), 'when rejected', 'to contain', 'Artifact details must be specified manually if no Pom file is given');
     });
-    it('should stop if version nor pom file is not provided', function () {
+    it('should stop if version nor pom or package files are not provided', function () {
       var params = { vargs: { url: 'http', group_id: 'drone', artifact_id: 'artifactory' }};
 
       return expect(arti.check_params(params), 'when rejected', 'to contain', 'Artifact details must be specified manually if no Pom file is given');
-    });
-    it('should stop if pom file does not exists', function () {
-      var params = { vargs: { url: 'http', pom: 'NOP' }, workspace: {}};
-
-      return expect(arti.check_params(params), 'when rejected', 'to contain', 'Given pom file has to exists');
-    });
-    it('should stop if pom file is invalid', function () {
-      var params = { vargs: { url: 'http', pom: 'pom.json' }, workspace: { path: './test/files' }};
-
-      return expect(arti.check_params(params), 'when rejected', 'to contain', 'An error happened while trying to parse the pom file');
-    });
-    it('should stop if pom file is not enough', function () {
-      var params = {vargs: { url: 'http', pom: 'useless.xml'}, workspace: { path: './test/files' }};
-
-      return expect(arti.check_params(params), 'when rejected', 'to contain', 'Some artifact details are missing from Pom file');
-    });
-    it('should read details from a correct pom file', function () {
-      var params = {vargs: { url: 'http', pom: 'pom.xml'}, workspace: { path: './test/files' }};
-
-      return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
     });
     it('should read details from correct group id, artifact id and version', function () {
       var params = {vargs: { url: 'http', group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'}, workspace: { path: './test/files' }};
 
       return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
     });
+  });
+
+  describe('#parse_pom_file()', function() {
+    it('should stop if pom file does not exists', function () {
+      var params = { vargs: { url: 'http', pom: 'NOP', files: [] }, workspace: {}};
+      
+      return expect(arti.parse_pom_file(params), 'when rejected', 'to contain', 'Given pom file has to exists');
+    });
+    it('should stop if pom file is invalid', function () {
+      var params = { vargs: { url: 'http', pom: 'pom.json', files: [] }, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_pom_file(params), 'when rejected', 'to contain', 'An error happened while trying to parse the pom file');
+    });
+    it('should stop if pom file is not enough', function () {
+      var params = {vargs: { url: 'http', pom: 'useless.xml', files: [] }, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_pom_file(params), 'when rejected', 'to contain', 'Some artifact details are missing from Pom file');
+    });
+    it('should read details from a correct pom file', function () {
+      var params = {vargs: { url: 'http', pom: 'pom.xml', files: [] }, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_pom_file(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0', files: [ 'pom.xml' ] } });
+    });
     it('should add pom to files automatically if provided',function() {
       var params={vargs: { url: 'http',pom: 'pom.xml'}, workspace: {path: './test/files'}};
 
-      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+      return expect(arti.parse_pom_file(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
     });
     it('should not add duplicate pom to files if pom already specified as file',function(){
       var params={vargs: { url: 'http',pom: 'pom.xml',files: ['pom.xml']}, workspace: {path: './test/files'}};
 
-      return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+      return expect(arti.parse_pom_file(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+  });
+
+  describe('#parse_package_file()', function () {
+    it('should stop if package file does not exists', function () {
+      var params = { vargs: { url: 'http', package: 'NOP', files: [] }, workspace: {}};
+
+      return expect(arti.parse_package_file(params), 'when rejected', 'to contain', 'Given package file has to exist');
+    });
+    it('should stop if package file is invalid', function () {
+      var params = { vargs: { url: 'http', package: 'invalid_package.json' }, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_package_file(params), 'when rejected', 'to contain', 'An error happened while trying to parse the package file');
+    });
+    it('should stop if package file is not enough', function () {
+      var params = {vargs: { url: 'http', package: 'useless_package.json'}, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_package_file(params), 'when rejected', 'to contain', 'Some artifact details are missing from package file');
+    });
+    it('should read details from a correct package file', function () {
+      var params = {vargs: { url: 'http', package: 'package.json', files: [] }, workspace: { path: './test/files' }};
+
+      return expect(arti.parse_package_file(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0', files: [ 'package.json' ] } });
+    });
+  });
+
+  describe('#merge_arguments()', function () {
+    it('should merge file arguments if defaults not implicitly set', function () {
+      var vargs = {};
+      var file_args = {version: '0', group_id: 'com.example.drone', artifact_id: 'artifactory'};
+
+      return expect(arti.merge_arguments(vargs, file_args), 'to satisfy', { version: '0', group_id: 'com.example.drone', artifact_id: 'artifactory' });
+    });
+    it('should override file arguments if defaults are implicitly set', function () {
+      var vargs = {version: '2'};
+      var file_args = {version: '0', group_id: 'com.example.drone', artifact_id: 'artifactory'};
+
+      return expect(arti.merge_arguments(vargs, file_args), 'to satisfy', { version: '2', group_id: 'com.example.drone', artifact_id: 'artifactory' });
     });
   });
 

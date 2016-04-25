@@ -61,6 +61,67 @@ var do_upload = function (params) {
   );
 }
 
+var merge_arguments = function (vargs, file_args) {
+  file_args.group_id    || (file_args.group_id = file_args.groupid);
+  file_args.artifact_id || (file_args.artifact_id = file_args.artifactid);
+
+  return Object.assign(file_args, vargs);
+}
+
+var parse_pom_file = function (params) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
+      return reject('Given pom file has to exists');
+    }
+
+    pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
+      if (err) { return reject('An error happened while trying to parse the pom file: ' + err); }
+      params.vargs.files || (params.vargs.files = []);
+      params.vargs = merge_arguments(params.vargs, pomResponse.pomObject.project);
+
+      if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+        return reject('Some artifact details are missing from Pom file');
+      }
+
+      if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
+        params.vargs.files.push(params.vargs.pom);
+      }
+
+      return resolve(params);
+    });
+  });
+}
+
+var parse_package_file = function (params) {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(params.workspace.path + '/' + params.vargs.package)) {
+      return reject('Given package file has to exist');
+    }
+
+    try {
+      var package = require(params.workspace.path + '/' + params.vargs.package)
+      var config = package.config || {};
+      config.version = package.version;
+
+      params.vargs.files || (params.vargs.files = []);
+      params.vargs = merge_arguments(params.vargs, config);
+
+    } catch (err) {
+      return reject('An error happened while trying to parse the package file: ' + err);
+    }
+
+    if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
+      return reject('Some artifact details are missing from package file: ' + params.vargs.version);
+    }
+
+    if(params.vargs.files.indexOf(params.vargs.package)==-1) {
+      params.vargs.files.push(params.vargs.package);
+    }
+
+    return resolve(params);
+  });
+}
+
 var check_params = function (params) {
   return new Promise((resolve, reject) => {
     params.vargs.username      || (params.vargs.username = '');
@@ -73,26 +134,9 @@ var check_params = function (params) {
     }
 
     if (params.vargs.pom) {
-      if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
-        return reject('Given pom file has to exists');
-      }
-
-      pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
-        if (err) { return reject('An error happened while trying to parse the pom file: ' + err); }
-
-        params.vargs.group_id    || (params.vargs.group_id = pomResponse.pomObject.project.groupid);
-        params.vargs.artifact_id || (params.vargs.artifact_id = pomResponse.pomObject.project.artifactid);
-        params.vargs.version     || (params.vargs.version = pomResponse.pomObject.project.version);
-        if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
-          return reject('Some artifact details are missing from Pom file');
-        }
-
-        if(params.vargs.files.indexOf(params.vargs.pom)==-1) {
-          params.vargs.files.push(params.vargs.pom);
-        }
-
-        return resolve(params);
-      });
+      return parse_pom_file(params);
+    } else if (params.vargs.package) {
+      return parse_package_file(params);
     } else {
       if (!params.vargs.group_id || !params.vargs.artifact_id || !params.vargs.version) {
         return reject('Artifact details must be specified manually if no Pom file is given');
@@ -115,7 +159,10 @@ if(require.main === module) {
   .catch((msg) => { winston.error(msg); process.exit(1); });
 } else {
   module.exports = {
+    merge_arguments: merge_arguments,
     check_params: check_params,
+    parse_pom_file: parse_pom_file,
+    parse_package_file: parse_package_file,
     expands_files: expands_files,
     do_upload: do_upload,
     replace_dots: replace_dots

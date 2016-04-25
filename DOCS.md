@@ -5,6 +5,7 @@ You can override the default configuration with the following parameters:
 * `username` - Artifactory username, default to blank
 * `password` - Artifactory password, default to blank
 * `pom` - An optional pom.xml path were to read project details
+* `package` - An optional package.json path were to read project details
 * `group_id` - Project group id, default to value from Pom file
 * `artifact_id` - Project artifact id, default to value from Pom file
 * `version` - Artifact version, default to value from Pom file
@@ -16,9 +17,9 @@ All file paths must be relative to current project sources
 
 File paths are interpreted with [node-glob](https://github.com/isaacs/node-glob#glob-primer) and can contain things such as regex, or directory wildcards(./\*\*/\*.js)
 
-## Example
+## Examples
 
-The following is a sample configuration in your .drone.yml file:
+The following is a sample pom configuration in your .drone.yml file:
 
 ```yaml
 publish:
@@ -39,4 +40,24 @@ publish:
 If a pom parameter is specified it will be automatically deployed. It is not necessary to specify the pom under the files parameter. 
 
 In the example above, pom.xml will be deployed as ```<groupId>-<artifactId>-<version>.pom```
+
+The following is a sample package configuration in your .drone.yml file:
+
+```yaml
+publish:
+  artifactory:
+    url: http://arti.company.com
+    username: admin
+    password: password 
+    package: package.json
+    repo_key: libs-snapshot-local
+    files:
+      - dist/**/*.min.js
+```
+
+## package.json deployment
+
+If a package parameter is specified it will be automatically deployed. It is not necessary to specify the package.json under the files parameter. 
+
+Your package.json should include a package.version, package.config.group_id, and a package.config.artifact_id
 

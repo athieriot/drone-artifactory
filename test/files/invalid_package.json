@@ -1,0 +1,7 @@
+{
+  "version": "1.0"
+  "config": {
+    "group_id": "test_group_id",
+    "artifact_id": "test_artifact_id"
+  }
+}
