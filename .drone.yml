@@ -1,31 +1,16 @@
-build:
-  image: node:4.2
-  commands:
+pipeline:
+  test:
+    image: node:4.2
+    commands:
     - make install
     - make test
-
-publish:
-  coverage:
-    # Must match parts of the absolute path
-    include: drone-artifactory/coverage/lcov.info
-    when:
-      branch: master
   docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
+    storage_driver: overlay
     repo: plugins/drone-artifactory
-    tag: latest
+    tag: [ "latest" ]
     when:
-      branch: master
-  docker:
-    username: $$DOCKER_USER
-    password: $$DOCKER_PASS
-    email: $$DOCKER_EMAIL
-    repo: plugins/drone-artifactory
-    tag: develop
-    when:
-      branch: develop
+      branch: release/0.4
+      event: push
 
 plugin:
   name: Artifactory
