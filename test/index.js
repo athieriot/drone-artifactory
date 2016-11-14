@@ -5,12 +5,23 @@ var nock = require('nock');
 
 describe('Drone Artifactory', function () {
   describe('#check_params()', function () {
+
+    beforeEach('reset Drone 0.5 environment', function () {
+      delete process.env.PLUGIN_URL;
+      delete process.env.PLUGIN_GROUP_ID;
+      delete process.env.PLUGIN_ARTIFACT_ID;
+      delete process.env.PLUGIN_VERSION;
+      delete process.env.PLUGIN_POM;
+      delete process.env.PLUGIN_FILES;
+    });
+
     it('should stop if Artifactory URL is not provided', function () {
       var params = { vargs: {}};
 
       return expect(arti.check_params(params), 'when rejected', 'to contain', 'Artifactory URL is missing and Mandatory');
     });
-    it('should replace default values', function () {
+    it('should set default values', function () {
+      // Set required parameters
       var params = { vargs: {url: 'http', group_id: 'drone', artifact_id: 'artifactory', version: 2.0}};
 
       return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { username: '', password: '', files: [], force_upload: false } });
@@ -64,6 +75,67 @@ describe('Drone Artifactory', function () {
       var params={vargs: { url: 'http',pom: 'pom.xml',files: ['pom.xml']}, workspace: {path: './test/files'}};
 
       return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['pom.xml']}})
+    });
+    describe('load params from env in drone 0.5', function () {
+      it('should read details from a correct pom file', function () {
+        var params = { vargs: {} };
+
+        process.env['PLUGIN_URL'] = 'http'
+        process.env['PLUGIN_POM'] = 'test/files/pom.xml'
+
+        return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
+      });
+      it('should read details from correct group id, artifact id and version', function () {
+        var params = {};
+
+        process.env['PLUGIN_URL'] = 'http'
+        process.env['PLUGIN_GROUP_ID'] = 'com.example.drone'
+        process.env['PLUGIN_ARTIFACT_ID'] = 'artifactory'
+        process.env['PLUGIN_VERSION'] = '0'
+
+        return expect(arti.check_params(params), 'when fulfilled', 'to satisfy', { vargs: { group_id: 'com.example.drone', artifact_id: 'artifactory', version: '0'} });
+      });
+      it('should add pom to files automatically if provided',function() {
+        var params={};
+
+        process.env['PLUGIN_URL'] = 'http'
+        process.env['PLUGIN_POM'] = 'test/files/pom.xml'
+
+        return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['test/files/pom.xml']}})
+      });
+      it('should not add duplicate pom to files if pom already specified as file',function(){
+        var params={};
+
+        process.env['PLUGIN_URL'] = 'http'
+        process.env['PLUGIN_POM'] = 'test/files/pom.xml'
+        process.env['PLUGIN_FILES'] = 'test/files/pom.xml'
+
+        return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['test/files/pom.xml']}})
+      });
+      it('should properly parse files',function(){
+        var params={};
+
+        process.env['PLUGIN_URL'] = 'http'
+        process.env['PLUGIN_GROUP_ID'] = 'com.example.drone'
+        process.env['PLUGIN_ARTIFACT_ID'] = 'artifactory'
+        process.env['PLUGIN_VERSION'] = '0'
+        process.env['PLUGIN_FILES'] = 'file1,file2,file3'
+
+        return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {files: ['file1','file2','file3']}})
+      });
+      it('load secrets from environment',function(){
+        var params={};
+
+        process.env['PLUGIN_GROUP_ID'] = 'com.example.drone'
+        process.env['PLUGIN_ARTIFACT_ID'] = 'artifactory'
+        process.env['PLUGIN_VERSION'] = '0'
+
+        process.env['ARTIFACTORY_URL'] = 'https'
+        process.env['ARTIFACTORY_USERNAME'] = 'johndoe'
+        process.env['ARTIFACTORY_PASSWORD'] = 'mypassword'
+
+        return expect(arti.check_params(params),'when fulfilled', 'to satisfy', {vargs: {url: 'https', username: 'johndoe', password: 'mypassword'}})
+      });
     });
   });
 
