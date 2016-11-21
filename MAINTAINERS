@@ -31,6 +31,10 @@
     name = "Aurélien Thieriot"
     email = "a.thieriot@gmail.com"
     login = "athieriot"
+  [people.jmccann]
+    name = "Jacob McCann"
+    email = "jmccann.git@gmail.com"
+    login = "jmccann"
 
 [org]
   [org.core]
@@ -42,5 +46,6 @@
       "msteinert",
       "nlf",
       "tboerger",
-      "athieriot"
+      "athieriot",
+      "jmccann"
     ]
