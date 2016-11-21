@@ -14,7 +14,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: plugins/drone-artifactory
+    repo: athieriot/drone-artifactory
     tag: latest
     when:
       branch: master
@@ -22,7 +22,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: plugins/drone-artifactory
+    repo: athieriot/drone-artifactory
     tag: develop
     when:
       branch: develop
@@ -31,6 +31,6 @@ plugin:
   name: Artifactory
   desc: Publish files and artifacts to Artifactory
   type: publish
-  image: plugins/drone-artifactory
+  image: athieriot/drone-artifactory
   labels:
     - artifactory
