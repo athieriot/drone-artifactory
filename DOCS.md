@@ -28,10 +28,10 @@ It is highly recommended to put the **ARTIFACTORY_USERNAME** and **ARTIFACTORY_P
 into secrets so it is not exposed to users. This can be done using the drone-cli.
 
 ```bash
-drone secret add --image=plugins/artifactory \
+drone secret add --image=athieriot/artifactory \
     octocat/hello-world ARTIFACTORY_USERNAME kevinbacon
 
-drone secret add --image=plugins/artifactory \
+drone secret add --image=athieriot/artifactory \
     octocat/hello-world ARTIFACTORY_PASSWORD pa55word
 ```
 
@@ -51,7 +51,7 @@ The following is a sample configuration in your .drone.yml file:
 ```yaml
 pipeline:
   artifactory:
-    image: plugins/artifactory
+    image: athieriot/artifactory
     url: http://arti.company.com
     username: admin
     pom: pom.xml
