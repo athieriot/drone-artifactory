@@ -16,19 +16,47 @@ All file paths must be relative to current project sources
 
 File paths are interpreted with [node-glob](https://github.com/isaacs/node-glob#glob-primer) and can contain things such as regex, or directory wildcards(./\*\*/\*.js)
 
+## Secrets
+
+The following secret values can be set to configure the plugin.
+
+* **ARTIFACTORY_URL** - corresponds to **url**
+* **ARTIFACTORY_USERNAME** - corresponds to **username**
+* **ARTIFACTORY_PASSWORD** - corresponds to **password**
+
+It is highly recommended to put the **ARTIFACTORY_USERNAME** and **ARTIFACTORY_PASSWORD**
+into secrets so it is not exposed to users. This can be done using the drone-cli.
+
+```bash
+drone secret add --image=athieriot/artifactory \
+    octocat/hello-world ARTIFACTORY_USERNAME kevinbacon
+
+drone secret add --image=athieriot/artifactory \
+    octocat/hello-world ARTIFACTORY_PASSWORD pa55word
+```
+
+Then sign the YAML file after all secrets are added.
+
+```bash
+drone sign octocat/hello-world
+```
+
+See [secrets](http://readme.drone.io/0.5/usage/secrets/) for additional
+information on secrets
+
 ## Example
 
 The following is a sample configuration in your .drone.yml file:
 
 ```yaml
-publish:
+pipeline:
   artifactory:
+    image: athieriot/artifactory
     url: http://arti.company.com
     username: admin
-    password: password 
-    pom: pom.xml 
+    pom: pom.xml
     repo_key: libs-snapshot-local
-    files: 
+    files:
       - target/*.jar
       - target/*.war
       - dist/**/*.min.js
@@ -36,7 +64,6 @@ publish:
 
 ## pom.xml deployment
 
-If a pom parameter is specified it will be automatically deployed. It is not necessary to specify the pom under the files parameter. 
+If a pom parameter is specified it will be automatically deployed. It is not necessary to specify the pom under the files parameter.
 
 In the example above, pom.xml will be deployed as ```<groupId>-<artifactId>-<version>.pom```
-

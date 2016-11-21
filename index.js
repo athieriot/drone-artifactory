@@ -63,10 +63,27 @@ var do_upload = function (params) {
 
 var check_params = function (params) {
   return new Promise((resolve, reject) => {
-    params.vargs.username      || (params.vargs.username = '');
-    params.vargs.password      || (params.vargs.password = '');
-    params.vargs.files         || (params.vargs.files = []);
-    params.vargs.force_upload  || (params.vargs.force_upload = false);
+    // Create empty vargs for Drone 0.5
+    params.vargs  || (params.vargs = {})
+
+    // Set workspace path to CWD for Drone 0.5
+    params.workspace || ((params.workspace = {}) && (params.workspace.path = process.cwd()))
+
+    // First check if provided by Drone plugin (0.4)
+    // Then check if provided as Drone 0.5 secret env
+    // Then check if provided as Drone 0.5 plugin env
+    // Then return default
+    params.vargs.username      || (params.vargs.username = process.env.ARTIFACTORY_USERNAME) || (params.vargs.username = process.env.PLUGIN_USERNAME) || (params.vargs.username = '');
+    params.vargs.password      || (params.vargs.password = process.env.ARTIFACTORY_PASSWORD) || (params.vargs.password = process.env.PLUGIN_PASSWORD) || (params.vargs.password = '');
+    params.vargs.files         || (process.env.PLUGIN_FILES && (params.vargs.files = process.env.PLUGIN_FILES.split(','))) || (params.vargs.files = []);
+    params.vargs.force_upload  || (params.vargs.force_upload = process.env.PLUGIN_FORCE_UPLOAD) || (params.vargs.force_upload = false);
+
+    params.vargs.url         || (params.vargs.url = process.env.ARTIFACTORY_URL) || (params.vargs.url = process.env.PLUGIN_URL)
+    params.vargs.group_id    || (params.vargs.group_id = process.env.PLUGIN_GROUP_ID)
+    params.vargs.artifact_id || (params.vargs.artifact_id = process.env.PLUGIN_ARTIFACT_ID)
+    params.vargs.version     || (params.vargs.version = process.env.PLUGIN_VERSION)
+    params.vargs.pom         || (params.vargs.pom = process.env.PLUGIN_POM)
+    params.vargs.repo_key    || (params.vargs.repo_key = process.env.PLUGIN_REPO_KEY)
 
     if (!params.vargs.url) {
       return reject("Artifactory URL is missing and Mandatory");
@@ -74,7 +91,7 @@ var check_params = function (params) {
 
     if (params.vargs.pom) {
       if (!fs.existsSync(params.workspace.path + '/' + params.vargs.pom)) {
-        return reject('Given pom file has to exists');
+        return reject('Given pom file has to exists: ' + params.workspace.path + '/' + params.vargs.pom);
       }
 
       pomParser.parse({ filePath: params.workspace.path + '/' + params.vargs.pom }, function(err, pomResponse) {
@@ -109,10 +126,19 @@ var replace_dots = function(param){
 
 // Expose public methods for tests
 if(require.main === module) {
-  plugin.parse()
-  .then(check_params)
-  .then(do_upload)
-  .catch((msg) => { winston.error(msg); process.exit(1); });
+  // Drone is >= 0.5
+  if(process.env.DRONE_VERSION) {
+    check_params({})
+    .then(do_upload)
+    .catch((msg) => { winston.error(msg); process.exit(1); });
+
+  // Drone is 0.4
+  } else {
+    plugin.parse()
+    .then(check_params)
+    .then(do_upload)
+    .catch((msg) => { winston.error(msg); process.exit(1); });
+  }
 } else {
   module.exports = {
     check_params: check_params,
