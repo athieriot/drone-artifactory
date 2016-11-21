@@ -1,10 +1,9 @@
-build:
-  image: node:4.2
-  commands:
-    - make install
-    - make test
-
 pipeline:
+  build:
+    image: node:4.2
+    commands:
+      - make install
+      - make test
   #coverage:
     # Must match parts of the absolute path
     #include: drone-artifactory/coverage/lcov.info
