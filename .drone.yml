@@ -4,11 +4,12 @@ pipeline:
     commands:
       - make install
       - make test
-  #coverage:
+  coverage:
+    image: plugins/coverage
     # Must match parts of the absolute path
-    #include: drone-artifactory/coverage/lcov.info
-    #when:
-      #branch: master
+    include: drone-artifactory/coverage/lcov.info
+    when:
+      branch: master
   publish:
     image: plugins/docker
     repo: athieriot/drone-artifactory
