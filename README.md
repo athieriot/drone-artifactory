@@ -1,7 +1,7 @@
 # drone-artifactory
 
 [![Build Status](http://beta.drone.io/api/badges/athieriot/drone-artifactory/status.svg)](http://beta.drone.io/athieriot/drone-artifactory)
-[![Coverage Status](https://aircover.co/badges/drone-plugins/drone-artifactory/coverage.svg)](https://aircover.co/drone-plugins/drone-artifactory)
+[![Coverage Status](https://aircover.co/badges/athieriot/drone-artifactory/coverage.svg)](https://aircover.co/athieriot/drone-artifactory)
 [![](https://images.microbadger.com/badges/image/athieriot/drone-artifactory.svg)](https://microbadger.com/images/athieriot/drone-artifactory "Get your own image badge on microbadger.com")
 
 Drone plugin to publish files and artifacts to Artifactory. For the usage information and a listing of the available options please take a look at [the docs](DOCS.md).
