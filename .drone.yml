@@ -10,14 +10,18 @@ pipeline:
     pattern: coverage/lcov.info
     server: https://aircover.co
     when:
+      event: push
       branch: master
+      local: false
   publish:
     image: plugins/docker
     repo: athieriot/drone-artifactory
     tag: latest
     when:
+      event: push
       branch: master
-      
+      local: false
+
 plugin:
   name: Artifactory
   desc: Publish files and artifacts to Artifactory
