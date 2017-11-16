@@ -4,10 +4,11 @@ pipeline:
     commands:
       - make install
       - make test
-  publish:
+  docker:
     image: plugins/docker
     repo: athieriot/drone-artifactory
     tag: latest
+    secrets: [ docker_username, docker_password ]
     when:
       event: push
       branch: master
