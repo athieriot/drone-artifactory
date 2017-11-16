@@ -33,7 +33,7 @@
     "gulp-exit": "0.0.2",
     "gulp-istanbul": "^0.10.3",
     "gulp-mocha": "^2.2.0",
-    "nock": "^7.0.2",
+    "nock": "^9.1.0",
     "unexpected": "^10.8.1"
   }
 }
