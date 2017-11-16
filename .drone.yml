@@ -4,15 +4,6 @@ pipeline:
     commands:
       - make install
       - make test
-  coverage:
-    image: plugins/coverage
-    # Must match parts of the absolute path
-    pattern: coverage/lcov.info
-    server: https://aircover.co
-    when:
-      event: push
-      branch: master
-      local: false
   publish:
     image: plugins/docker
     repo: athieriot/drone-artifactory
