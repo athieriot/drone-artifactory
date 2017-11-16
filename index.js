@@ -1,6 +1,3 @@
-const Drone = require('drone-node');
-const plugin = new Drone.Plugin();
-
 const ArtifactoryAPI = require('artifactory-api');
 const pomParser = require("pom-parser");
 const glob = require("glob");
@@ -134,6 +131,9 @@ if(require.main === module) {
 
   // Drone is 0.4
   } else {
+    const Drone = require('drone-node');
+    const plugin = new Drone.Plugin();
+
     plugin.parse()
     .then(check_params)
     .then(do_upload)
