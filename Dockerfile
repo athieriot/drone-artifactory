@@ -9,6 +9,7 @@ RUN apk update && \
 
 WORKDIR /node
 ADD package.json /node/
+ADD package-lock.json /node/
 RUN npm install --production
 
 ADD index.js /node/

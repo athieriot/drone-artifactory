@@ -1,6 +1,6 @@
 pipeline:
   build:
-    image: node:4.2
+    image: node:carbon
     commands:
       - make install
       - make test
