@@ -317,4 +317,11 @@ describe('Drone Artifactory', function () {
       expect(arti.replace_dots('com.example.xyz'), 'to contain', 'com/example/xyz');
     });
   });
+
+  describe('#get_checksums()', function () {
+    it('should return md5 and sha1 checksums', function () {
+      var hashes = { md5: '875a40cf62dae71c4ef76d54549d2278', sha1: 'a96897ba300505431175d43c753875407de7a134'};
+      return expect(arti.get_checksums('./test/files/pom.xml'), 'when fulfilled', 'to equal', hashes);
+    });
+  });
 });

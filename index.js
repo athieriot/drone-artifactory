@@ -7,6 +7,8 @@ const btoa = require('btoa');
 const fs = require('fs');
 const path = require('path');
 
+const crypto = require('crypto');
+
 var expands_files = function (path, files) { return [].concat.apply([], files.map((f) => { return glob.sync(path + '/' + f); })); }
 
 var publish_file = function (artifactory, repo_key, project, file, force_upload) {
@@ -16,14 +18,16 @@ var publish_file = function (artifactory, repo_key, project, file, force_upload)
     if (file.indexOf('pom') > -1) { basename = project.artifact_id + '-' + project.version + '.pom'; }
 
     winston.info('Uploading ' + file + ' as ' + basename + ' into ' + repo_key);
-    return artifactory.uploadFile(repo_key, '/' + replace_dots(project.group_id) + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload)
-    .then((uploadInfo) => {
+    return get_checksums(file).then((checksums) => {
+      artifactory.uploadFile(repo_key, '/' + replace_dots(project.group_id) + '/' + project.artifact_id + '/' + project.version + '/' + basename, file, force_upload, checksums)
+      .then((uploadInfo) => {
 
-      winston.info('Upload successful. Available at: ' + uploadInfo.downloadUri)
-      resolve();
-    }).catch((err) => {
+        winston.info('Upload successful. Available at: ' + uploadInfo.downloadUri)
+        resolve();
+      }).catch((err) => {
 
-      reject('An error happened while trying to publish the file ' + file + ': ' + err);
+        reject('An error happened while trying to publish the file ' + file + ': ' + err);
+      });
     });
   });
 }
@@ -121,6 +125,27 @@ var replace_dots = function(param){
   return param.replace(new RegExp('\\.', 'g'),'/');
 }
 
+var get_checksums = function(file){
+  return new Promise(function(resolve, reject){
+    var stream = fs.createReadStream(file),
+        md5 = crypto.createHash('md5'),
+        sha1 = crypto.createHash('sha1');
+
+    stream.on('data', function(data) {
+      md5.update(data, 'utf8');
+      sha1.update(data, 'utf8');
+    });
+
+    stream.on('end', function() {
+      resolve({
+        md5: md5.digest('hex'),
+        sha1: sha1.digest('hex')
+      });
+    });
+  });
+}
+
+
 // Expose public methods for tests
 if(require.main === module) {
   // Drone is >= 0.5
@@ -144,6 +169,7 @@ if(require.main === module) {
     check_params: check_params,
     expands_files: expands_files,
     do_upload: do_upload,
-    replace_dots: replace_dots
+    replace_dots: replace_dots,
+    get_checksums: get_checksums
   }
 }
